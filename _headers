@@ -1,9 +1,0 @@
-# Coastal World Replica - Updated with local hashed assets
-/*
-  Access-Control-Allow-Origin: *
-  Access-Control-Allow-Methods: GET, POST, OPTIONS
-  Access-Control-Allow-Headers: *
-
-/assets/*
-  Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=31536000

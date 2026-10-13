@@ -1,0 +1,14 @@
+{
+  "name": "coastalworld-local",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Localhost adaptation of the Coastal World browser experience",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "check": "node --check server.mjs && node --check local-runtime.js",
+    "test": "node --test tests/server.test.mjs"
+  },
+  "engines": { "node": ">=20" }
+}
