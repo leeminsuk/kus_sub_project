@@ -1,151 +1,139 @@
-# Coastal World — Localhost
+# 121분의 1 · 캠퍼스의 신호
 
-[Coastal World 원본](https://coastalworld.merci-michel.com/)의 3D 장면, 캐릭터, 애니메이션, 지도와 미니게임을 로컬에서 실행하는 보관용 프로젝트입니다. 원본 웹빌드의 렌더러와 게임 자산을 사용합니다.
+고려대학교의 석조 고딕 건축과 가을 캠퍼스에서 영감을 받은 **Next.js 16 + Three.js 3D 오픈월드 게임**입니다. 원본 [coastalworld-local](https://github.com/leeminsuk/coastalworld-local)의 실제 캐릭터 모델과 애니메이션을 재사용하고, 캠퍼스·게임 화면·퀘스트·저장 시스템을 새로 만들었습니다.
 
-누락된 JavaScript 번들과 모델·텍스처·음원·게임 데이터를 복구하고, 외부 자산 프록시 없이 실행하도록 수정했습니다. 원본의 이메일 계정 및 클라우드 저장은 **브라우저 자동 저장과 JSON 백업·복원**으로 바꾸었습니다.
+시간제한 없이 캠퍼스를 걸으며 생명과학과 정보보안의 여섯 신호를 되찾고, 전공 교류제의 불빛을 켜 보세요. 추천 순서를 따르지 않아도 모든 장소와 퀘스트를 처음부터 방문할 수 있습니다.
 
-![로컬 첫 실행의 시작 화면](docs/screenshots/00-intro.png)
+![캠퍼스의 신호 시작 화면](docs/verification-assets/campus-intro.png)
 
 ## 실행
 
-Node.js 20 이상과 WebGL을 지원하는 브라우저가 필요합니다. Windows에서는 Chrome으로 확인했습니다.
+Node.js 20.9 이상과 WebGL2 지원 브라우저가 필요합니다. 로그인, API 키, 외부 데이터베이스는 필요하지 않습니다.
 
-```powershell
-gh repo clone leeminsuk/coastalworld-local
-cd coastalworld-local
-node server.mjs
+```bash
+npm ci
+npm run dev
 ```
 
-**http://localhost:4173** 에 접속하세요. `npm install`, 빌드, 배포 계정이나 API 키는 필요하지 않습니다. 서버는 이 PC의 `127.0.0.1`에서만 연결을 받습니다. 종료하려면 서버 터미널에서 `Ctrl+C`를 누릅니다.
+[http://127.0.0.1:3000](http://127.0.0.1:3000)에서 플레이하세요.
 
-포트를 변경하려면 PowerShell에서 다음과 같이 실행합니다.
+```bash
+# 배포용 빌드와 실행
+npm run build
+npm start
 
-```powershell
-$env:PORT = "4174"
-node server.mjs
+# 타입 및 게임 상태 검사
+npm run check
 ```
 
-브라우저 저장은 주소별로 구분됩니다. `localhost`, `127.0.0.1` 또는 포트를 바꾸기 전에 **Local saves → Download backup**으로 진행 상황을 보관하세요.
+Vercel 등 Next.js 지원 호스팅에는 기본 Next.js 설정으로 배포할 수 있습니다. 이 저장소는 비공개 보관을 목적으로 하며, 자동으로 공개 배포하지 않습니다.
 
-## 조작과 저장
+## Next.js를 어떻게 사용했는가
 
-| 기능 | 조작 |
-| --- | --- |
-| 섬에서 이동 | 방향키 또는 WASD |
-| NPC와 대화·다음 대사 | 가까이에서 Enter 또는 대화 아이콘 |
-| 지도와 퀘스트 | 오른쪽 아래 휴대전화 |
-| 다른 섬으로 이동 | 지도 핀 선택 → 이동 확인 |
-| 캐릭터 꾸미기 | 오른쪽 위 얼굴 버튼 |
-| 미니게임 | 자동 전진, ←/→ 또는 A/D로 조향 |
-| 음소거 | 오른쪽 위 스피커 버튼 |
-| 저장·백업·복원 | 메뉴 → Local saves |
+이 프로젝트의 실행 서버와 앱 구조는 **Next.js 16의 App Router**입니다. `npm run dev`는 `next dev`, `npm run build`는 `next build`, `npm start`는 `next start`를 실행합니다. 게임 화면 전체를 Next.js 앱의 React 컴포넌트로 구현했으며, 별도 HTML 게임을 iframe으로 끼워 넣는 구조가 아닙니다.
 
-진행 상황은 현재 브라우저에 자동 저장됩니다. **Download backup**으로 받은 JSON 파일은 **Restore backup**에서 다시 불러올 수 있습니다. 잘못되거나 손상된 파일은 기존 진행 상황을 보존하며 거부합니다.
+| Next.js / React 구성 | 실제 파일 | 담당하는 기능 |
+| --- | --- | --- |
+| App Router의 `/` 경로 | [`src/app/page.tsx`](src/app/page.tsx) | 루트 페이지에서 게임 컴포넌트 렌더링 |
+| 루트 레이아웃과 메타데이터 | [`src/app/layout.tsx`](src/app/layout.tsx) | 한국어 문서, 제목·설명·뷰포트, 공통 CSS와 로컬 폰트 |
+| 클라이언트 컴포넌트 | [`src/components/Game.tsx`](src/components/Game.tsx) | `"use client"` 경계 안에서 도입·퀘스트·지도·대화·설정·사진·결과 화면과 상태 관리 |
+| 미니게임 React UI | [`src/components/QuestChallenge.tsx`](src/components/QuestChallenge.tsx) | 여섯 퍼즐의 입력·판정·힌트·해설·점수 반영 |
+| 브라우저 전용 3D 로딩 | `Game.tsx`의 `useEffect` → `import('@/game/engine')` | 서버 렌더링 중에는 WebGL·`window`·`document`에 접근하지 않고, 마운트된 뒤에 Three.js 엔진 생성 |
+| 정적 파일 제공 | [`public/`](public/) | 모델·텍스처·Draco 디코더·폰트를 `/assets/`, `/vendors/`, `/fonts/`로 제공 |
+| 오류 화면 | [`src/app/error.tsx`](src/app/error.tsx) | React 화면 오류 발생 시 재시도 UI |
+| 프로덕션 빌드 | [`next.config.ts`](next.config.ts), [`package.json`](package.json) | TypeScript 검사, 코드 번들링·분할, 정적 페이지 사전 생성, Next.js 서버 실행 |
 
-## 직접 실행한 화면
+동작 흐름은 다음과 같습니다.
 
-아래 이미지는 이 프로젝트를 `http://localhost:4173`에서 실행하고 브라우저로 직접 캡처한 화면입니다. 원본 사이트의 홍보 이미지나 생성 이미지가 아닙니다.
-
-### 섬과 지도
-
-![Cove Island에서 NPC와 만나는 장면](docs/screenshots/03-cove-island.png)
-
-| Wild Island | Lake Island |
-| --- | --- |
-| ![Wild Island](docs/screenshots/07-wild-island.png) | ![Lake Island](docs/screenshots/08-lake-island.png) |
-
-| Palm Island | 지도 |
-| --- | --- |
-| ![Palm Island](docs/screenshots/09-palm-island.png) | ![휴대전화 지도](docs/screenshots/06-map.png) |
-
-### 방향키 이동 전후
-
-실제 브라우저 키보드 이벤트를 입력하고 게임의 캐릭터 좌표 변화를 읽어 확인했습니다. 좌표를 직접 바꿔 이동 결과를 만들지 않았습니다.
-
-| 이동 전 | 이동 후 |
-| --- | --- |
-| ![이동 전](docs/screenshots/01-before-movement.png) | ![이동 후](docs/screenshots/02-after-movement.png) |
-
-| 키 | 약 1.4초 입력 후 수평 이동 거리 |
-| --- | ---: |
-| ↑ | 10.12 게임 좌표 단위 |
-| ↓ | 10.01 게임 좌표 단위 |
-| ← | 6.88 게임 좌표 단위 |
-| → | 7.33 게임 좌표 단위 |
-
-### 꾸미기와 로컬 저장
-
-| 캐릭터 꾸미기 | 백업·복원 |
-| --- | --- |
-| ![캐릭터 꾸미기](docs/screenshots/04-customization.png) | ![로컬 저장](docs/screenshots/05-local-saves.png) |
-
-### 미니게임
-
-| 자전거 | 자동차 |
-| --- | --- |
-| ![자전거 미니게임](docs/screenshots/10-bike-race.png) | ![자동차 미니게임](docs/screenshots/12-car-race.png) |
-
-| 보트 | 제트스키 |
-| --- | --- |
-| ![보트 미니게임](docs/screenshots/13-boat-race.png) | ![제트스키 미니게임](docs/screenshots/14-jetski-race.png) |
-
-![자전거 완주 후 퀘스트 보상](docs/screenshots/11-bike-completed.png)
-
-## 검증
-
-2026-10-13, Windows / Chrome 154.0.8037.98 / Node.js 24.19.0에서 확인했습니다.
-
-- 첫 로딩, 인트로와 NPC 대화, 네 방향 실제 키 입력에 따른 캐릭터 이동.
-- 지도를 마우스로 이동하고 핀을 선택해 Cove / Wild / Lake / Palm 섬 사이 이동.
-- 캐릭터 색상·얼굴·액세서리 변경과 새로고침 후 유지.
-- 브라우저 저장, 백업 다운로드, 다른 의상으로 변경한 뒤 백업을 가져와 이전 상태 복원.
-- 잘못된 백업 파일을 거부하고 현재 저장 내용 유지.
-- 유효한 형식에 손상된 게임 데이터를 넣은 백업도 거부하고 기존 저장 보존.
-- 네 미니게임의 실제 방향키 조향, 완주 판정, 퀘스트 보상, 원래 섬 복귀.
-- 완료한 퀘스트 4개와 포인트 유지, 게임 포인트로 샌들 구매 후 새로고침해도 소유권 유지.
-- 퀘스트·액세서리·브랜드 화면, 음소거 전환과 오디오 컨텍스트 실행 상태.
-- **비공개 GitHub 저장소에서 새로 clone한 사본**에서 인트로 → 섬 진입 → 방향키 이동. 이 검사에서는 외부 HTTP 요청을 차단했으며, 외부 요청·실패한 응답·JavaScript 예외가 모두 0건이었습니다.
-
-| 미니게임 | 검증 주행 시간 | 완주·보상·섬 복귀 |
-| --- | ---: | --- |
-| 자전거 | 67.99초 | 통과 |
-| 자동차 | 74.84초 | 통과 |
-| 보트 | 58.33초 | 통과 |
-| 제트스키 | 81.73초 | 통과 |
-
-자전거는 NPC 대화로 진입했습니다. 나머지 레이스는 NPC가 사용하는 장면 전환 함수를 호출해 진입한 다음, 모두 브라우저의 실제 키보드 이벤트로 조향했습니다. 주행 중 좌표나 완주·보상 상태를 강제로 변경하지 않았습니다. 위 시간은 최고 기록이 아닌 검증 주행의 게임 내 시간입니다. 레이스 검사 중 JavaScript 예외와 실패한 자산 응답은 0건이었습니다.
-
-![네 미니게임 완료 후의 퀘스트 화면](docs/screenshots/15-quests.png)
-
-검증 범위는 위 항목입니다. 모든 NPC 대사 분기, 모든 퀘스트 조합과 다른 브라우저까지 전수 검사한 것은 아닙니다.
-
-서버와 자산 검사는 다음 명령으로 다시 실행할 수 있습니다.
-
-```powershell
-npm.cmd run check
-npm.cmd test
+```text
+브라우저 → Next.js의 / 페이지 → React Game UI
+                                  │
+                                  ├─ 지도·대화·퍼즐·결과 화면
+                                  ├─ 브라우저 자동 저장 / JSON 백업
+                                  └─ 동적 로딩된 Three.js 엔진
+                                       ├─ 캠퍼스 렌더링·카메라·충돌
+                                       └─ 원본 GLB 캐릭터·애니메이션
 ```
 
-검사는 SPA 경로, JavaScript·WASM·GLB 응답 형식, 오디오 부분 요청, 누락 파일 처리, 비공개 폴더 접근 차단, 1,000개 이상의 번들 자산 참조를 확인합니다. 브라우저에서 직접 한 게임 조작 검증은 이 서버 검사와 별도로 진행했습니다.
+초기 HTML은 Next.js가 사전 생성하고, 브라우저에서 React가 상호작용을 연결합니다. 움직임과 렌더링은 Three.js가 담당하며, 엔진의 가까운 NPC·현재 위치 이벤트를 React UI와 연결했습니다. 페이지가 해제될 때는 렌더 루프·이벤트·GPU 자원을 정리합니다.
 
-## 원본과의 차이 및 구성
+이번 게임은 브라우저에서 완주 가능한 단일 사용자 게임이므로 **API Route, 별도 백엔드, Supabase, LLM API를 필수로 두지 않았습니다.** 저장은 `localStorage`와 JSON 파일을 사용합니다. 원본 비교용 `/original/index.html`은 별도로 보존한 참고 자료이며, 새 게임의 실행 경로는 `/`입니다. 구현 방식은 [Next.js 공식 App Router 설치·구조 안내](https://nextjs.org/docs/app/getting-started/installation)를 참고했습니다.
 
-- 게임의 장면과 렌더러, 물리 처리, NPC, 퀘스트, 네 가지 미니게임은 원본 웹빌드를 사용합니다.
-- 서버 로그인과 클라우드 동기화 대신 로컬 자동 저장 및 백업 UI를 제공합니다. 분석·쿠키 동의·로그인용 reCAPTCHA 호출은 비활성화했습니다.
-- 모델·텍스처·음원·게임 데이터는 저장소에 포함되어 원본 자산 서버가 없어도 로드됩니다. NPC 소개의 **YouTube 영상과 외부 브랜드 링크는 인터넷 연결이 필요**하며, 영상은 Skip으로 넘길 수 있습니다.
-- 원본 개발 프로젝트의 미니파이 전 소스나 편집용 3D 원본 파일은 포함하지 않습니다. `assets/`는 실행용 웹빌드입니다.
+## 조작
 
-| 경로 | 역할 |
+| 조작 | 동작 |
 | --- | --- |
-| `server.mjs` | 의존성 없는 localhost 정적 서버 |
-| `local-runtime.js` | 로컬 저장·백업 UI와 외부 서비스 분리 |
-| `assets/`, `vendors/`, `icons/` | 게임 번들, 데이터, 모델, 이미지, 음원, Draco 디코더 |
-| `tests/server.test.mjs` | 서버 응답과 자산 참조 검사 |
-| `scripts/sync-assets.py` | 원본 공개 자산에서 누락 파일을 복구한 도구 |
-| `docs/screenshots/` | 직접 촬영한 로컬 실행 화면 |
+| WASD / 방향키 | 이동과 캐릭터 애니메이션 |
+| Shift | 더 빠르게 달리기 |
+| Alt | 천천히 걷기 |
+| 지면 클릭 / 누른 채 이동 | 해당 방향으로 이동 |
+| 우클릭 드래그 | 카메라 회전 |
+| 마우스 휠 | 확대·축소 |
+| Space | 점프 |
+| E / Enter | 가까운 NPC·발견물과 상호작용 |
+| M | 지도와 목적지 선택 |
+| J | 퀘스트·발견 노트 |
+| P | 사진 모드 |
+| Esc | 화면 닫기·일시정지 메뉴 |
+| 모바일 방향 버튼 | 터치 이동 |
+
+지도에서 목적지를 선택하면 빛나는 점이 방향을 알려 줍니다. 다른 길을 선택하거나 퀘스트를 미뤄도 괜찮습니다. 건물은 외관 중심으로 구성되어 있으며, 체험은 바깥의 연구원·학생 NPC에게 말을 걸어 시작합니다.
+
+## 처음부터 끝까지
+
+1. 닉네임과 관심 전공을 적어 캠퍼스 여권을 만듭니다. 비워 두어도 시작할 수 있습니다.
+2. 안내자 호연에게 공동 축제 장치의 이야기를 듣습니다.
+3. 다음 여섯 의뢰를 **원하는 순서대로** 해결합니다.
+4. 중앙광장으로 돌아와 여섯 신호로 축제를 밝힙니다.
+5. 나의 결과 카드를 PNG로 저장하고, 계속 탐험하거나 퀘스트 최고점에 다시 도전합니다.
+
+| 장소 | 퀘스트 | 실제 조작 |
+| --- | --- | --- |
+| 생태 연못 | 연못의 작은 균형 | 수온·pH·용존 산소 슬라이더 조절 |
+| 은행 온실 | 씨앗에 적힌 편지 | 여섯 DNA 염기를 짝 규칙에 맞춰 복원 |
+| 생명과학관 | 함께 살아가는 정원 | 정원 생태계의 세 역할을 골라 구성 |
+| 학생회관 | 수상한 축제 초대장 | 다섯 메시지 판별, 매 문항 해설 |
+| 미래정보관 | 끊어진 신호를 잇다 | 안전한 네트워크 경로 순서 선택 |
+| 중앙도서관 | 도서관의 마지막 암호 | 이동 암호 해석과 정답 입력 |
+
+오답을 내도 게임이 막히지 않습니다. 피싱은 모든 문항을 끝내면 실제 정답 수를 반영해 완료하고, 나머지 퍼즐은 힌트와 재시도를 제공합니다. 재도전 시 최고점을 보존합니다.
+
+선택 탐험으로 네 개의 작은 순간을 여권에 남길 수 있고, 오래된 책의 단서를 따라 숨겨진 발자국 퍼즐을 발견할 수 있습니다. 발견 수집과 이스터에그는 본편 엔딩의 필수 조건이 아닙니다. 사진 모드에서는 게임 화면을 숨기고 카메라를 조절해 실제 3D 장면을 저장할 수 있습니다.
+
+![여섯 신호를 되찾은 뒤 중앙광장](docs/verification-assets/final-e2e-festival.png)
+
+## 저장
+
+진행 기록, 위치, 닉네임, 최고점, 발견 도장은 현재 브라우저의 `localStorage`에 자동 저장됩니다. 설정에서 JSON 백업을 내려받거나 다시 불러올 수 있습니다. 브라우저·포트·주소를 변경하기 전에는 백업하세요. 로컬 저장을 차단한 환경에서도 게임은 작동하지만 기록을 파일로 보관해야 합니다.
+
+실시간 서버 랭킹·계정·AI API는 사용하지 않습니다. 결과 문구는 플레이 점수에 따른 규칙 기반 문구이며, 생태 수치는 게임 속 실험 조건입니다.
+
+## 구성
+
+- `src/app/`: Next.js App Router, 화면 스타일과 메타데이터
+- `src/components/Game.tsx`: 도입·HUD·지도·대화·발견·사진·결과 화면
+- `src/components/QuestChallenge.tsx`: 여섯 미니게임과 피드백
+- `src/game/engine.ts`: 입력·카메라·이동·충돌·NPC·애니메이션 연결
+- `src/game/world.ts`: 석조 건물·온실·연못·산책길·축제 연출
+- `src/game/character.ts`: 원본 GLB·표정·걷기·달리기·춤 애니메이션
+- `src/game/content.ts`, `discoveries.ts`: 시나리오·퀘스트·맵·발견 데이터
+- `src/game/state.ts`: 순서 독립 진행·저장 검증·결과 계산
+- `public/assets/`, `public/vendors/`: 원본 모델·텍스처·Draco 디코더
+- `public/fonts/`: 자체 호스팅 폰트와 OFL 고지
+- `public/original/index.html`: 비교용 원본 실행 진입점
+
+원본의 정적 서버와 테스트·복구 도구는 `reference/`에 보존했습니다. 현재 실행에는 Next.js만 사용합니다.
+
+## 문서와 검증
+
+- [시나리오 및 설계](docs/scenario.md)
+- [캠퍼스 공간과 조사 자료](docs/campus-design.md)
+- [원본에서 재사용한 부분](docs/source-adaptation.md)
+- [실제 브라우저 완주 검증](docs/verification.md)
+- [원본 README](docs/ORIGINAL-README.md)
 
 ## 출처
 
-원작은 **Coastal Community Bank / Merci-Michel**의 [Coastal World](https://coastalworld.merci-michel.com/)입니다. 시작점은 [jameswalter4566/coastalworld-replica](https://github.com/jameswalter4566/coastalworld-replica), 커밋 `7088739ec6c26f758895b6fe64819ea51be7607d`입니다. 누락된 실행 자산은 원본 공개 사이트에서 복구했습니다.
+원본 캐릭터·표정·애니메이션·보존 자산은 **Coastal Community Bank / Merci-Michel**의 [Coastal World](https://coastalworld.merci-michel.com/) 및 [leeminsuk/coastalworld-local](https://github.com/leeminsuk/coastalworld-local)에서 가져왔습니다. 기존 고지와 저작권은 유지하며, 원작 전체에 새로운 오픈소스 라이선스를 부여하지 않습니다.
 
-원작의 저작권·브랜드·기존 고지는 해당 권리자에게 있으며, 이 저장소는 원작 전체에 새로운 오픈소스 라이선스를 부여하지 않습니다. 비공개 로컬 보관용이며 공식 배포 프로젝트가 아닙니다.
+맵은 고려대학교에서 영감을 받아 코드로 만든 가상의 캠퍼스입니다. 실제 지형의 정확한 복제나 학교 공식 게임이 아닙니다. Gowun Batang과 Noto Sans KR은 `public/fonts/`에 포함된 SIL Open Font License를 따릅니다.

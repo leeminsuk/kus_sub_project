@@ -1,6 +1,12 @@
-.qa/
 node_modules/
+.next/
+out/
+.env*
+!.env.example
+*.tsbuildinfo
 *.log
-tmpclaude-*
 .DS_Store
-
+.qa/
+.playwright-cli/
+output/
+tmp/
